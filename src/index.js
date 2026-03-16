@@ -157,6 +157,8 @@ async function drillOnce(walletAddress) {
     challenge.siteId || site.siteId
   );
 
+  console.log(`[Drill] Submit response: ${JSON.stringify(submission).substring(0, 300)}`);
+
   if (submission.failedConstraintIndices) {
     console.log(
       `[Drill] Failed constraints: ${JSON.stringify(submission.failedConstraintIndices)}. Skipping.`

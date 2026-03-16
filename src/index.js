@@ -125,6 +125,19 @@ async function pickSite() {
   return site;
 }
 
+// Track background refinery jobs
+const pendingLots = [];
+
+async function processLotInBackground(crudeLotId) {
+  try {
+    await pollRefinery(crudeLotId);
+    await postReceipt(crudeLotId);
+    console.log(`[Background] Lot ${crudeLotId} fully processed and posted on-chain.`);
+  } catch (err) {
+    console.error(`[Background] Lot ${crudeLotId} failed: ${err.message}`);
+  }
+}
+
 async function drillOnce(walletAddress) {
   await ensureAuth(walletAddress);
 
@@ -144,11 +157,9 @@ async function drillOnce(walletAddress) {
     challenge.siteId || site.siteId
   );
 
-  console.log(`[Drill] Submit response keys: ${Object.keys(submission).join(", ")}`);
-
   if (submission.failedConstraintIndices) {
     console.log(
-      `[Drill] Failed constraints: ${JSON.stringify(submission.failedConstraintIndices)}. Skipping to next challenge.`
+      `[Drill] Failed constraints: ${JSON.stringify(submission.failedConstraintIndices)}. Skipping.`
     );
     return false;
   }
@@ -156,8 +167,11 @@ async function drillOnce(walletAddress) {
   const crudeLotId = submission.crudeLotId || submission.lotId || submission.id;
   console.log(`[Drill] Submitted. Lot ID: ${crudeLotId}`);
 
-  await pollRefinery(crudeLotId);
-  await postReceipt(crudeLotId);
+  // Process refinery + receipt in background, don't block drilling
+  if (crudeLotId) {
+    pendingLots.push(crudeLotId);
+    processLotInBackground(crudeLotId);
+  }
 
   return true;
 }

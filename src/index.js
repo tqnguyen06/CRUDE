@@ -144,6 +144,8 @@ async function drillOnce(walletAddress) {
     challenge.siteId || site.siteId
   );
 
+  console.log(`[Drill] Submit response keys: ${Object.keys(submission).join(", ")}`);
+
   if (submission.failedConstraintIndices) {
     console.log(
       `[Drill] Failed constraints: ${JSON.stringify(submission.failedConstraintIndices)}. Skipping to next challenge.`
@@ -151,7 +153,7 @@ async function drillOnce(walletAddress) {
     return false;
   }
 
-  const crudeLotId = submission.crudeLotId;
+  const crudeLotId = submission.crudeLotId || submission.lotId || submission.id;
   console.log(`[Drill] Submitted. Lot ID: ${crudeLotId}`);
 
   await pollRefinery(crudeLotId);

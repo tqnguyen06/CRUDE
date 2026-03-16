@@ -76,7 +76,7 @@ export async function authenticate(walletAddress) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: walletAddress, signature, message }),
+      body: JSON.stringify({ miner: walletAddress, signature, message }),
     }
   );
   if (!verifyRes.ok) {

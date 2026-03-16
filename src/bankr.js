@@ -20,8 +20,10 @@ async function request(method, path, body) {
 
 export async function getIdentity() {
   const data = await request("GET", "/agent/me");
-  console.log(`[Bankr] Wallet: ${data.address}`);
-  return data;
+  const evmWallet = data.wallets?.find((w) => w.chain === "evm");
+  const address = evmWallet?.address;
+  console.log(`[Bankr] Wallet: ${address}`);
+  return { ...data, address };
 }
 
 export async function signMessage(message) {

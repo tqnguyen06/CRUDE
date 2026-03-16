@@ -60,7 +60,7 @@ export async function authenticate(walletAddress) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: walletAddress }),
+      body: JSON.stringify({ miner: walletAddress }),
     }
   );
   if (!nonceRes.ok) {

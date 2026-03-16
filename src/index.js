@@ -40,7 +40,7 @@ async function stake(amountWei) {
 
 async function pollRefinery(crudeLotId) {
   console.log(`[Refinery] Polling lot ${crudeLotId}...`);
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 60; i++) {
     const status = await checkRefineStatus(crudeLotId);
     if (status.status === "ready") {
       console.log(`[Refinery] Lot ${crudeLotId} is ready.`);
@@ -61,8 +61,21 @@ async function pollRefinery(crudeLotId) {
 async function postReceipt(crudeLotId) {
   console.log(`[Receipt] Getting calldata for lot ${crudeLotId}...`);
   const receiptData = await getReceiptCalldata(crudeLotId);
-  const result = await submitTransaction(receiptData.to, receiptData.data);
-  console.log(`[Receipt] Posted on-chain.`);
+  console.log(`[Receipt] Calldata response keys: ${JSON.stringify(Object.keys(receiptData))}`);
+
+  // Handle nested response shapes
+  const tx = receiptData.transaction || receiptData.calldata || receiptData;
+  const to = tx.to || receiptData.to;
+  const data = tx.data || receiptData.data;
+
+  if (!to || !data) {
+    console.error(`[Receipt] Full response: ${JSON.stringify(receiptData).slice(0, 500)}`);
+    throw new Error(`Receipt calldata missing 'to' or 'data'`);
+  }
+
+  console.log(`[Receipt] Posting to ${to}...`);
+  const result = await submitTransaction(to, data);
+  console.log(`[Receipt] Posted on-chain. TX: ${result.txHash || JSON.stringify(result).slice(0, 200)}`);
   return result;
 }
 

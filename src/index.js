@@ -80,8 +80,11 @@ async function claimRewards(walletAddress) {
   console.log("[Claim] Rewards claimed.");
 }
 
-// Prefer shallowest sites first to avoid tier rejections
-const DEPTH_ORDER = ["shallow", "medium", "deep"];
+// Eligible depths based on rig tier (Platform = 50M+ stake)
+const ELIGIBLE_DEPTHS = ["shallow", "medium"];
+
+// Prefer deeper wells (more credits) among eligible depths
+const DEPTH_PRIORITY = ["medium", "shallow"];
 
 async function pickSite() {
   const data = await listSites();
@@ -90,13 +93,22 @@ async function pickSite() {
     throw new Error("No drill sites available");
   }
 
-  // Sort by depth (shallowest first) to maximize eligibility
-  const sorted = [...sites].sort(
-    (a, b) => DEPTH_ORDER.indexOf(a.estimatedDepth) - DEPTH_ORDER.indexOf(b.estimatedDepth)
+  // Filter to only eligible depths, then prefer deeper (more rewarding)
+  const eligible = sites.filter((s) => ELIGIBLE_DEPTHS.includes(s.estimatedDepth));
+  if (eligible.length === 0) {
+    throw new Error(`No eligible sites. Available depths: ${sites.map((s) => s.estimatedDepth).join(", ")}`);
+  }
+
+  const sorted = [...eligible].sort(
+    (a, b) => DEPTH_PRIORITY.indexOf(a.estimatedDepth) - DEPTH_PRIORITY.indexOf(b.estimatedDepth)
   );
 
-  const site = sorted[0];
-  console.log(`[Sites] Selected: ${site.region} (${site.siteId}) [${site.estimatedDepth}]`);
+  // Pick randomly among the top-priority depth to spread across sites
+  const bestDepth = sorted[0].estimatedDepth;
+  const topSites = sorted.filter((s) => s.estimatedDepth === bestDepth);
+  const site = topSites[Math.floor(Math.random() * topSites.length)];
+
+  console.log(`[Sites] Selected: ${site.region} (${site.siteId}) [${site.estimatedDepth}] (${eligible.length} eligible)`);
   return site;
 }
 

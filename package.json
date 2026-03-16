@@ -1,0 +1,17 @@
+{
+  "name": "crude-mining-bot",
+  "version": "1.0.0",
+  "description": "Automated CRUDE Driller mining bot for Base chain",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  }
+}

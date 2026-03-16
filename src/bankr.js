@@ -27,7 +27,11 @@ export async function getIdentity() {
 }
 
 export async function signMessage(message) {
-  const data = await request("POST", "/agent/sign", { message });
+  const data = await request("POST", "/agent/sign", {
+    message,
+    signatureType: "personal_sign",
+    chainId: 8453,
+  });
   return data.signature;
 }
 

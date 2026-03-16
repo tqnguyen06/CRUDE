@@ -157,7 +157,10 @@ async function drillOnce(walletAddress) {
     challenge.siteId || site.siteId
   );
 
-  console.log(`[Drill] Submit response: ${JSON.stringify(submission).substring(0, 300)}`);
+  if (submission.status === "rejected") {
+    console.log(`[Drill] Rejected: ${submission.reason || "unknown"}. Moving to next challenge.`);
+    return false;
+  }
 
   if (submission.failedConstraintIndices) {
     console.log(

@@ -20,18 +20,23 @@ export async function solveChallenge(challenge) {
   const questions = challenge.questions || challenge.question;
   const constraints = challenge.constraints;
 
+  const companies = challenge.companies;
+
   let userPrompt = "";
   if (doc) {
     userPrompt += `DOCUMENT:\n${doc}\n\n`;
+  }
+  if (companies && companies.length > 0) {
+    userPrompt += `VALID COMPANY NAMES (use these exact names):\n${companies.join(", ")}\n\n`;
   }
   if (questions) {
     const q = Array.isArray(questions) ? questions.join("\n") : questions;
     userPrompt += `QUESTION:\n${q}\n\n`;
   }
   if (constraints && constraints.length > 0) {
-    userPrompt += `CONSTRAINTS:\n${constraints.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\n`;
+    userPrompt += `CONSTRAINTS (ALL must be satisfied):\n${constraints.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\n`;
   }
-  userPrompt += "Respond with ONLY the artifact string on a single line.";
+  userPrompt += "Think step by step about each constraint, then respond with ONLY the artifact string on a single line. Use EXACT company names from the VALID COMPANY NAMES list.";
 
   console.log("[Solver] Sending challenge to Claude...");
 

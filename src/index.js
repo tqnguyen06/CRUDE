@@ -162,9 +162,13 @@ async function drillOnce(walletAddress) {
     return false;
   }
 
-  if (submission.failedConstraintIndices) {
+  if (submission.failedConstraintIndices && submission.failedConstraintIndices.length > 0) {
+    const failedDetails = submission.failedConstraintIndices.map((idx) => {
+      const c = challenge.constraints && challenge.constraints[idx];
+      return c ? `[${idx}] ${c.substring(0, 60)}` : `[${idx}]`;
+    });
     console.log(
-      `[Drill] Failed constraints: ${JSON.stringify(submission.failedConstraintIndices)}. Skipping.`
+      `[Drill] Failed ${submission.failedConstraintIndices.length}/${(challenge.constraints || []).length} constraints: ${failedDetails.join(" | ")}`
     );
     return false;
   }

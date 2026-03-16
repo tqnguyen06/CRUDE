@@ -37,10 +37,7 @@ export async function signMessage(message) {
 
 export async function submitTransaction(to, data, value = "0") {
   const res = await request("POST", "/agent/submit", {
-    to,
-    data,
-    value,
-    chainId: 8453,
+    transaction: { to, data, value, chainId: 8453 },
     waitForConfirmation: true,
   });
 

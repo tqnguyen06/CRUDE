@@ -81,20 +81,14 @@ async function claimRewards(walletAddress) {
 }
 
 async function pickSite(walletAddress) {
-  const sites = await listSites();
+  const data = await listSites();
+  const sites = data.sites || data;
   if (!sites || sites.length === 0) {
     throw new Error("No drill sites available");
   }
 
-  // Pick first available site
-  const available = sites.filter((s) => s.available !== false);
-  if (available.length === 0) {
-    console.log("[Sites] No available sites, picking first anyway.");
-    return sites[0];
-  }
-
-  const site = available[Math.floor(Math.random() * available.length)];
-  console.log(`[Sites] Selected: ${site.name || site.id} (${site.id})`);
+  const site = sites[Math.floor(Math.random() * sites.length)];
+  console.log(`[Sites] Selected: ${site.region} (${site.siteId})`);
   return site;
 }
 
@@ -104,7 +98,7 @@ async function drillOnce(walletAddress) {
   const site = await pickSite(walletAddress);
 
   console.log("[Drill] Requesting challenge...");
-  const challenge = await requestChallenge(walletAddress, site.id);
+  const challenge = await requestChallenge(walletAddress, site.siteId);
 
   console.log("[Drill] Solving challenge...");
   const artifact = await solveChallenge(challenge);
@@ -112,7 +106,7 @@ async function drillOnce(walletAddress) {
   console.log("[Drill] Submitting artifact...");
   const submission = await submitArtifact(
     walletAddress,
-    site.id,
+    site.siteId,
     challenge.nonce,
     artifact
   );

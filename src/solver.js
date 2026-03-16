@@ -7,10 +7,13 @@ const SYSTEM_PROMPT = `You are solving a CRUDE Driller mining challenge. You wil
 
 RULES:
 - Your response must be EXACTLY one line — the artifact string and nothing else.
-- Do NOT output explanations, preamble, thinking, or anything other than the artifact.
+- Do NOT output explanations, preamble, thinking, reasoning steps, or anything other than the artifact.
+- Do NOT say "Wait", "Let me", "I need to", or any other filler. Just the answer.
+- The artifact is typically company names separated by " | " (pipe with spaces).
 - The artifact must satisfy ALL constraints listed.
 - Read the prose carefully — answers require multi-hop reasoning across the document.
-- Be precise and literal in your answer.`;
+- Be precise and literal in your answer.
+- Use exact company names as they appear in the document.`;
 
 export async function solveChallenge(challenge) {
   const doc = challenge.doc || challenge.document;
@@ -39,7 +42,19 @@ export async function solveChallenge(challenge) {
     messages: [{ role: "user", content: userPrompt }],
   });
 
-  const artifact = response.content[0].text.trim();
+  let artifact = response.content[0].text.trim();
+
+  // If Claude leaked reasoning, extract just the pipe-delimited answer line
+  if (artifact.includes("\n")) {
+    const lines = artifact.split("\n").map((l) => l.trim()).filter(Boolean);
+    // Find the line that looks like a pipe-delimited answer (Company | Company)
+    const answerLine = lines.find((l) => l.includes("|")) || lines[0];
+    artifact = answerLine;
+  }
+
+  // Strip any leading/trailing quotes or markdown
+  artifact = artifact.replace(/^["'`]+|["'`]+$/g, "");
+
   console.log(`[Solver] Artifact: ${artifact.substring(0, 80)}${artifact.length > 80 ? "..." : ""}`);
   return artifact;
 }

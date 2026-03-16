@@ -20,7 +20,7 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function backoff(attempt, base = 2000, cap = 60000) {
+function backoff(attempt, base = 5000, cap = 60000) {
   const delay = Math.min(base * 2 ** attempt, cap);
   const jitter = delay * (Math.random() * 0.25);
   return delay + jitter;

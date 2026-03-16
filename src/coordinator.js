@@ -21,6 +21,12 @@ async function apiGet(path, authenticated = true) {
     await authenticate(globalWalletAddress);
     return apiGet(path, authenticated);
   }
+  if (res.status === 409) {
+    const text = await res.text();
+    console.log(`[Coordinator] 409 Conflict: ${text}. Waiting 30s...`);
+    await new Promise((r) => setTimeout(r, 30000));
+    return apiGet(path, authenticated);
+  }
   if (!res.ok) {
     const text = await res.text();
     if (text.includes("exp") && text.includes("claim timestamp check failed")) {

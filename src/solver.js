@@ -13,14 +13,17 @@ RULES:
 - Be precise and literal in your answer.`;
 
 export async function solveChallenge(challenge) {
-  const { document, constraints, question } = challenge;
+  const doc = challenge.doc || challenge.document;
+  const questions = challenge.questions || challenge.question;
+  const constraints = challenge.constraints;
 
   let userPrompt = "";
-  if (document) {
-    userPrompt += `DOCUMENT:\n${document}\n\n`;
+  if (doc) {
+    userPrompt += `DOCUMENT:\n${doc}\n\n`;
   }
-  if (question) {
-    userPrompt += `QUESTION:\n${question}\n\n`;
+  if (questions) {
+    const q = Array.isArray(questions) ? questions.join("\n") : questions;
+    userPrompt += `QUESTION:\n${q}\n\n`;
   }
   if (constraints && constraints.length > 0) {
     userPrompt += `CONSTRAINTS:\n${constraints.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\n`;

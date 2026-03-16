@@ -23,6 +23,11 @@ async function apiGet(path, authenticated = true) {
   }
   if (!res.ok) {
     const text = await res.text();
+    if (text.includes("exp") && text.includes("claim timestamp check failed")) {
+      console.log("[Coordinator] Token expired (exp claim), re-authenticating...");
+      await authenticate(globalWalletAddress);
+      return apiGet(path, authenticated);
+    }
     throw new Error(`Coordinator GET ${path} failed (${res.status}): ${text}`);
   }
   return res.json();
@@ -112,11 +117,12 @@ export async function requestChallenge(minerAddress, siteId) {
   return { ...data, requestNonce };
 }
 
-export async function submitArtifact(challengeId, requestNonce, artifact) {
+export async function submitArtifact(challengeId, requestNonce, artifact, siteId) {
   return apiPost("/v1/submit", {
     challengeId,
     requestNonce,
     artifact,
+    siteId,
   });
 }
 

@@ -115,7 +115,8 @@ async function drillOnce(walletAddress) {
   const submission = await submitArtifact(
     challenge.challengeId,
     challenge.requestNonce,
-    artifact
+    artifact,
+    challenge.siteId || site.siteId
   );
 
   if (submission.failedConstraintIndices) {

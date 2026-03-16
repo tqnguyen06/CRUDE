@@ -113,9 +113,8 @@ async function drillOnce(walletAddress) {
 
   console.log("[Drill] Submitting artifact...");
   const submission = await submitArtifact(
-    walletAddress,
-    site.siteId,
-    challenge.nonce,
+    challenge.challengeId,
+    challenge.requestNonce,
     artifact
   );
 

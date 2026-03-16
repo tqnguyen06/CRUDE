@@ -104,18 +104,18 @@ export async function listSites() {
 }
 
 export async function requestChallenge(minerAddress, siteId) {
-  const nonce = crypto.randomBytes(32).toString("hex");
+  const requestNonce = crypto.randomBytes(32).toString("hex");
   const data = await apiGet(
-    `/v1/drill?miner=${minerAddress}&siteId=${siteId}&nonce=${nonce}`
+    `/v1/drill?miner=${minerAddress}&siteId=${siteId}&nonce=${requestNonce}`
   );
-  return { ...data, nonce };
+  console.log(`[Coordinator] Challenge keys: ${Object.keys(data).join(", ")}`);
+  return { ...data, requestNonce };
 }
 
-export async function submitArtifact(minerAddress, siteId, nonce, artifact) {
+export async function submitArtifact(challengeId, requestNonce, artifact) {
   return apiPost("/v1/submit", {
-    miner: minerAddress,
-    siteId,
-    nonce,
+    challengeId,
+    requestNonce,
     artifact,
   });
 }

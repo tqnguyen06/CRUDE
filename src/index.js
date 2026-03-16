@@ -80,6 +80,19 @@ async function claimRewards(walletAddress) {
   console.log("[Claim] Rewards claimed.");
 }
 
+function getRigTier(stakeWei) {
+  const amount = BigInt(stakeWei);
+  if (amount >= 100_000_000n * 10n ** 18n) return "deepwater";
+  if (amount >= 50_000_000n * 10n ** 18n) return "platform";
+  return "wildcat";
+}
+
+const TIER_DEPTHS = {
+  wildcat: ["shallow"],
+  platform: ["shallow", "medium"],
+  deepwater: ["shallow", "medium", "deep"],
+};
+
 async function pickSite(walletAddress) {
   const data = await listSites();
   const sites = data.sites || data;
@@ -87,8 +100,17 @@ async function pickSite(walletAddress) {
     throw new Error("No drill sites available");
   }
 
-  const site = sites[Math.floor(Math.random() * sites.length)];
-  console.log(`[Sites] Selected: ${site.region} (${site.siteId})`);
+  const tier = getRigTier(config.stakeAmountWei);
+  const allowed = TIER_DEPTHS[tier];
+  const eligible = sites.filter((s) => allowed.includes(s.estimatedDepth));
+
+  if (eligible.length === 0) {
+    console.log(`[Sites] No ${tier}-eligible sites, available depths: ${sites.map(s => s.estimatedDepth).join(", ")}`);
+    throw new Error(`No eligible sites for ${tier} rig`);
+  }
+
+  const site = eligible[Math.floor(Math.random() * eligible.length)];
+  console.log(`[Sites] Selected: ${site.region} (${site.siteId}) [${site.estimatedDepth}]`);
   return site;
 }
 

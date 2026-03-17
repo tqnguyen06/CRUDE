@@ -225,6 +225,14 @@ async function main() {
       consecutiveErrors++;
       console.error(`[Error] Drill failed: ${err.message}`);
 
+      // Anthropic API credits exhausted — long pause instead of burning retries
+      if (err.message.includes("credit balance is too low")) {
+        console.error("[Error] Anthropic API credits exhausted. Pausing 10 minutes before retry...");
+        await sleep(600000);
+        consecutiveErrors = 0;
+        continue;
+      }
+
       if (consecutiveErrors >= config.maxRetries) {
         console.error(
           `[Error] ${consecutiveErrors} consecutive failures. Cooling down 5 minutes...`
